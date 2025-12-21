@@ -129,6 +129,17 @@ impl Doc {
 
         self.tokens.push(Token::BlockEnd(Block::InlineBlock));
     }
+
+    #[inline]/// =[`Doc::literal`]
+    pub fn lit(&mut self, text: &str) {self.write_str(text, Style::Literal);}
+    #[inline]/// =[`Doc::emphasis`]
+    pub fn em (&mut self, text: &str) {self.write_str(text, Style::Emphasis);}
+    #[inline]/// =[`Doc::emphasis`]
+    pub fn b  (&mut self, text: &str) {self.write_str(text, Style::Emphasis);}
+    #[inline]/// =[`Doc::invalid`]
+    pub fn inv(&mut self, text: &str) {self.write_str(text, Style::Invalid );}
+    #[inline]/// =[`Doc::invalid`]
+    pub fn x  (&mut self, text: &str) {self.write_str(text, Style::Invalid );}
 }
 
 impl Doc {

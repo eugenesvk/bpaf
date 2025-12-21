@@ -1402,6 +1402,13 @@ pub fn positional<T>(metavar: &'static str) -> ParsePositional<T> {
     build_positional(metavar)
 }
 
+#[must_use]///=[`short`](NamedArg::short)
+pub fn s(s:         char) -> NamedArg {short(s)}
+#[must_use]///=[`long`](NamedArg::long)
+pub fn l(l: &'static str) -> NamedArg {long (l)}
+#[must_use]///=[`positional`]
+pub fn pos<T>(metavar: &'static str) -> ParsePositional<T> {positional(metavar)}
+
 #[doc(hidden)]
 #[deprecated = "You should switch from command(name, sub) to sub.command(name)"]
 pub fn command<T>(name: &'static str, subparser: OptionParser<T>) -> ParseCommand<T>

@@ -263,6 +263,17 @@ impl NamedArg {
             Arg::ArgWord(_) | Arg::Word(_) | Arg::PosWord(_) => false,
         }
     }
+
+    #[must_use]/// =[`NamedArg:short`]
+    pub fn s   (mut self, s:        char) -> Self {self.short.push(s)        ; self}
+    #[must_use]/// =[`NamedArg:long` ]
+    pub fn l   (mut self, l:&'static str) -> Self {self.long .push(l)        ; self}
+    #[must_use]/// =[`NamedArg:help` ]
+    pub fn h<M>(mut self, h:         M  ) -> Self
+      where M: Into<Doc>,                         {self.help = Some(h.into()); self}
+    #[must_use]/// =[`NamedArg:argument]
+    pub fn arg<T>(self, metavar: &'static str) -> ParseArgument<T>
+      where T: FromStr + 'static                  {build_argument(self, metavar)   }
 }
 
 impl<T> OptionParser<T> {
@@ -805,6 +816,9 @@ impl<T> ParsePositional<T> {
             _ => meta,
         }
     }
+
+    #[must_use]/// =[`ParsePositional::positional`]
+    pub fn h<M>(mut self, h:M) -> Self where M:Into<Doc> {self.help = Some(h.into()); self}
 }
 #[allow(unused_variables)] // used when autocomplete is enabled
 fn parse_pos_word(
