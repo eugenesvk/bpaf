@@ -553,6 +553,71 @@ Available options:
 }
 
 #[test]
+fn alias_short_with_group_help() {
+    let a = s('a').h("option a").switch();
+    let b = s('b').h("option b").switch();
+    let c = s('c').h("option c").switch();
+
+    let ab = construct!(a, b).with_group_help(|meta| {
+        let mut b = Doc::default();
+        b.em("Uses either of those ");
+        b.meta(meta, false);
+        b
+    });
+    let parser = construct!(ab, c).to_options();
+
+    let r = parser.run_inner(&["--help"]).unwrap_err().unwrap_stdout();
+    let expected = "\
+Usage: [-a] [-b] [-c]
+
+Uses either of those [-a] [-b]
+    -a          option a
+    -b          option b
+
+Available options:
+    -c          option c
+    -h, --help  Prints help information
+";
+
+    assert_eq!(r, expected);
+
+    let r = parser.run_inner(&["-a", "-c"]).unwrap();
+    assert_eq!(r, ((true, false), true));
+}
+#[test]
+fn alias_short_with_group_help2() {
+    let a = s('a').h("option a").switch();
+    let b = s('b').h("option b").switch();
+    let c = s('c').h("option c").switch();
+
+    let ab = construct!(a, b).with_group_help(|meta| {
+        let mut b = Doc::default();
+        b.b("Uses either of those ");
+        b.meta(meta, false);
+        b
+    });
+    let parser = construct!(ab, c).to_options();
+
+    let r = parser.run_inner(&["--help"]).unwrap_err().unwrap_stdout();
+    let expected = "\
+Usage: [-a] [-b] [-c]
+
+Uses either of those [-a] [-b]
+    -a          option a
+    -b          option b
+
+Available options:
+    -c          option c
+    -h, --help  Prints help information
+";
+
+    assert_eq!(r, expected);
+
+    let r = parser.run_inner(&["-a", "-c"]).unwrap();
+    assert_eq!(r, ((true, false), true));
+}
+
+#[test]
 fn custom_help_and_version() {
     let h = short('H').long("halp").help("halps you");
     let v = short('v').long("release").help("prints release id");

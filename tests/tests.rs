@@ -234,6 +234,13 @@ fn fallback_with_ok() {
 }
 
 #[test]
+fn alias_short_fallback_with_ok() {
+    let parser = s('a').arg("ARG").fallback_with::<_, &str>(|| Ok(10u32)).to_options();
+    let r = parser.run_inner(&["-a", "1"]).unwrap(); assert_eq!(r,  1);
+    let r = parser.run_inner(&[]         ).unwrap(); assert_eq!(r, 10);
+}
+
+#[test]
 fn fallback_with_err() {
     let parser = short('a')
         .argument::<u32>("ARG")
@@ -391,6 +398,30 @@ Available options:
 }
 
 #[test]
+fn alias_short_help_args() {
+    let a = s('a').h("flag A, related to B").switch();
+    let b = s('b').h("flag B, related to A").switch();
+    let c = s('c').h("flag C, unrelated").switch();
+    let ab = construct!(a, b).group_help("Explanation applicable for both A and B:");
+    let parser = construct!(ab, c).to_options();
+
+    let help = parser.run_inner(&["--help"]).unwrap_err().unwrap_stdout();
+    let expected_help = "\
+Usage: [-a] [-b] [-c]
+
+Explanation applicable for both A and B:
+    -a          flag A, related to B
+    -b          flag B, related to A
+
+Available options:
+    -c          flag C, unrelated
+    -h, --help  Prints help information
+";
+
+    assert_eq!(expected_help, help);
+}
+
+#[test]
 fn group_help_commands() {
     let a = short('a')
         .switch()
@@ -510,6 +541,63 @@ Available options:
     parser.run_inner(&["-a"]).unwrap();
     parser.run_inner(&["-b"]).unwrap();
     parser.run_inner(&["-c"]).unwrap();
+}
+
+#[test]
+fn alias_short_multiple_aliases() {
+    let a = s('a').s('b').s('c').req_flag(());
+    let parser = a.to_options();
+
+    let help = parser.run_inner(&["--help"]).unwrap_err().unwrap_stdout();
+    let expected_help = "\
+Usage: -a
+
+Available options:
+    -a
+    -h, --help  Prints help information
+";
+    assert_eq!(expected_help, help);
+    parser.run_inner(&["-a"]).unwrap();
+    parser.run_inner(&["-b"]).unwrap();
+    parser.run_inner(&["-c"]).unwrap();
+}
+#[test]
+fn alias_short_simple_two_optional_flags() {
+    let a = s('a').l("AAAAA").switch();
+    let b = s('b').switch();
+    let x = construct!(a, b);
+    let decorated = x.to_options().descr("this is a test");
+
+    // no version information given - no version field generated
+    let err = decorated
+        .run_inner(&["-a", "-V"])
+        .unwrap_err()
+        .unwrap_stderr();
+    assert_eq!("`-V` is not expected in this context", err);
+
+    // accept only one copy of -a
+    let err = decorated
+        .run_inner(&["-a", "-a"])
+        .unwrap_err()
+        .unwrap_stderr();
+    assert_eq!(
+        "argument `-a` cannot be used multiple times in this context",
+        err
+    );
+
+    let help = decorated.run_inner(&["-h"]).unwrap_err().unwrap_stdout();
+
+    let expected_help = "\
+this is a test
+
+Usage: [-a] [-b]
+
+Available options:
+    -a, --AAAAA
+    -b
+    -h, --help   Prints help information
+";
+    assert_eq!(expected_help, help);
 }
 
 mod git {
