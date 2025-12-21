@@ -41,6 +41,26 @@ Available options:
 }
 
 #[test]
+fn alias_short_help_for_positional() {
+    let c = pos::<String>("C").h("help for\nc");
+    let d = pos::<String>("DDD").h("help for\nddd");
+    let parser = construct!(c, d).to_options();
+    let help = parser.run_inner(&["--help"]).unwrap_err().unwrap_stdout();
+
+    let expected_help = "\
+Usage: C DDD
+
+Available positional items:
+    C           help for c
+    DDD         help for ddd
+
+Available options:
+    -h, --help  Prints help information
+";
+    assert_eq!(expected_help, help);
+}
+
+#[test]
 fn dash_is_positional() {
     let a = positional::<String>("FILE");
     let parser = a.to_options();
