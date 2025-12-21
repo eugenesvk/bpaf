@@ -1,5 +1,8 @@
 # Change Log
 
+## bpaf [0.9.2001] - 2025-12-21
+- Add shorter aliases for various options (`s` instead of `short`) to allow a condensed tabular view of the code defining options to look similar to the help output, [see example](https://github.com/pacak/bpaf/discussions/253)
+
 ## bpaf [0.9.20] - 2025-05-25
 - Documentation fixes (#424)
   thanks @yuriks
